@@ -1,5 +1,9 @@
 # Vedic Calendar
 
+**Download:** [vedic-calendar.zip](https://github.com/technologistkj/vedic-calendar-wordpress-plugin/releases/latest/download/vedic-calendar.zip)
+(latest release). In WordPress: Plugins > Add New > Upload Plugin, choose the zip, Install, Activate.
+Use that zip, not GitHub's "Source code" download, which unpacks to the wrong folder name.
+
 WordPress plugin: shows the Vedic date (Kerala solar month by its Sanskrit name, day,
 KaliYuga year from Vishu) on its own line below the date of every post and page.
 
