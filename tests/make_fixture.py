@@ -5,7 +5,7 @@ the PHP must match: every Kerala solar month start from 1900 to 2100.
     python3 -m venv /tmp/v && /tmp/v/bin/pip install pyswisseph
     /tmp/v/bin/python tests/make_fixture.py
 
-Each line: first day (Y-m-d), sign (0 = Mesha), Kali Yuga year, the
+Each line: first day (Y-m-d), sign (0 = Mesha), KaliYuga year, the
 sankranti in IST, and how many minutes it fell after the Kerala cutoff
 (negative = before, so the month begins that day). Sankrantis come from
 swe.solcross_ut on the Lahiri sidereal zodiac, sunrise and sunset from

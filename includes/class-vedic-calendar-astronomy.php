@@ -1,7 +1,7 @@
 <?php
 /**
  * The arithmetic: which Kerala solar month and day a Gregorian date falls on,
- * and which Kali Yuga year.
+ * and which KaliYuga year.
  *
  * A solar month begins when the Sun enters a sidereal sign (a sankranti). The
  * Sun's position comes from VSOP87, referred to the stars with the Lahiri
@@ -12,14 +12,14 @@
  * before, after its three fifths, so that month begins on the civil date of
  * the sankranti.
  *
- * The Kali Yuga year changes at Vishu, the start of Mesha. The year that began
+ * The KaliYuga year changes at Vishu, the start of Mesha. The year that began
  * at Vishu in April 2026 is Kali 5127.
  *
  * Checked against Swiss Ephemeris (Lahiri) for every sankranti from 1900 to
  * 2100: sankranti times within 12 seconds, sunrise and sunset within 16
  * seconds, and all 2,412 month starts on the same day. See tests/.
  *
- * @package DheeVedicCalendar
+ * @package VedicCalendar
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -27,7 +27,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Pure functions; no WordPress calls, so the tests can run them in plain PHP.
  */
-final class Dhee_Vedic_Calendar_Astronomy {
+final class Vedic_Calendar_Astronomy {
 
 	/**
 	 * Kerala's clock, UTC+5:30, as a fraction of a day.
@@ -55,7 +55,7 @@ final class Dhee_Vedic_Calendar_Astronomy {
 	 * @param float $latitude  Where sunrise and sunset are taken, degrees north.
 	 * @param float $longitude Degrees east.
 	 * @return array {
-	 *     @type int    $year        Kali Yuga year.
+	 *     @type int    $year        KaliYuga year.
 	 *     @type int    $month       0 for Mesha through 11 for Meena.
 	 *     @type int    $day         Day of the solar month, from 1.
 	 *     @type string $month_start Y-m-d of that month's first day.

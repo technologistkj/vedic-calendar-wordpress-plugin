@@ -1,5 +1,5 @@
-=== Dhee Vedic Calendar ===
-Contributors: dheeyantra
+=== Vedic Calendar ===
+Contributors: aindram
 Tags: calendar, vedic, kerala, malayalam, panchang
 Requires at least: 5.9
 Tested up to: 7.1
@@ -8,17 +8,17 @@ Stable tag: 1.0.0
 License: GPL-2.0-only
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
-Shows the Vedic date below the date of every post and page: the Kerala solar month by its Sanskrit name, the day, and the Kali Yuga year.
+Shows the Vedic date below the date of every post and page: the Kerala solar month by its Sanskrit name, the day, and the KaliYuga year.
 
 == Description ==
 
-Under the date your theme already shows on a post or page, Dhee Vedic Calendar adds a second line with the same day in the Vedic calendar:
+Under the date your theme already shows on a post or page, Vedic Calendar adds a second line with the same day in the Vedic calendar:
 
 > November 3, 2026
-> Tula 17, Kali Yuga 5127
+> Tula 17, KaliYuga 5127
 
 * **Months** are Kerala's solar months, named by their signs in Sanskrit: Mesha, Vrishabha, Mithuna, Karkataka, Simha, Kanya, Tula, Vrishchika, Dhanu, Makara, Kumbha, Meena. Mesha is the month Kerala calls Medam, Simha is Chingam, and so on.
-* **Years** are Kali Yuga years. The year begins at Vishu, the first day of Mesha. The year that began at Vishu in April 2026 is Kali Yuga 5127.
+* **Years** are KaliYuga years. The year begins at Vishu, the first day of Mesha. The year that began at Vishu in April 2026 is KaliYuga 5127.
 
 It works with block themes and classic themes, with no setup. Choose the post types and the wording in Settings > Vedic Calendar.
 
@@ -40,7 +40,7 @@ The plugin sends nothing anywhere and stores nothing but its two settings. The d
 
 == Installation ==
 
-1. Upload the `dhee-vedic-calendar` folder to `/wp-content/plugins/`, or install the zip from Plugins > Add New > Upload Plugin.
+1. Upload the `vedic-calendar` folder to `/wp-content/plugins/`, or install the zip from Plugins > Add New > Upload Plugin.
 2. Activate it.
 3. Optionally, visit Settings > Vedic Calendar to choose the post types and the format.
 
@@ -48,7 +48,7 @@ The plugin sends nothing anywhere and stores nothing but its two settings. The d
 
 = My theme shows the date somewhere the line does not appear =
 
-The line is added where the theme asks WordPress for a post's date inside the list of posts. A theme that builds its date some other way, or prints it outside that list, will not get it. Put `[vedic_date]` where you want it, or call `dhee_vedic_date()` in a template.
+The line is added where the theme asks WordPress for a post's date inside the list of posts. A theme that builds its date some other way, or prints it outside that list, will not get it. Put `[vedic_date]` where you want it, or call `vedic_calendar_date()` in a template.
 
 = Can I show the Vedic date of another day? =
 
@@ -56,11 +56,11 @@ The line is added where the theme asks WordPress for a post's date inside the li
 
 = Can I change the words? =
 
-Settings > Vedic Calendar has a format field: `{month}`, `{day}` and `{year}` stand for the month, the day of the month and the Kali Yuga year. The month names can be translated like any other text in the plugin. Developers can rewrite the whole line with the `dhee_vedic_calendar_label` filter.
+Settings > Vedic Calendar has a format field: `{month}`, `{day}` and `{year}` stand for the month, the day of the month and the KaliYuga year. The month names can be translated like any other text in the plugin. Developers can rewrite the whole line with the `vedic_calendar_label` filter.
 
 = Can sunrise be taken somewhere other than Thiruvananthapuram? =
 
-Yes, with the `dhee_vedic_calendar_location` filter, which takes an array with `latitude` and `longitude`. Anywhere in Kerala gives the same months on all but the rarest days.
+Yes, with the `vedic_calendar_location` filter, which takes an array with `latitude` and `longitude`. Anywhere in Kerala gives the same months on all but the rarest days.
 
 = Does it work with caching plugins? =
 

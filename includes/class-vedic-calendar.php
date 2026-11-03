@@ -19,7 +19,7 @@
  * mark that escapes both — a theme that keeps a date and prints it after its
  * loop has ended — stays invisible.
  *
- * @package DheeVedicCalendar
+ * @package VedicCalendar
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -27,9 +27,9 @@ defined( 'ABSPATH' ) || exit;
 /**
  * The front end.
  */
-final class Dhee_Vedic_Calendar {
+final class Vedic_Calendar {
 
-	const OPTION = 'dhee_vedic_calendar';
+	const OPTION = 'vedic_calendar';
 
 	/**
 	 * U+2063 INVISIBLE SEPARATOR, which opens and closes a mark. Between them
@@ -42,7 +42,7 @@ final class Dhee_Vedic_Calendar {
 	/**
 	 * The one instance.
 	 *
-	 * @var Dhee_Vedic_Calendar|null
+	 * @var Vedic_Calendar|null
 	 */
 	private static $instance = null;
 
@@ -70,7 +70,7 @@ final class Dhee_Vedic_Calendar {
 	/**
 	 * The front end, created once.
 	 *
-	 * @return Dhee_Vedic_Calendar
+	 * @return Vedic_Calendar
 	 */
 	public static function instance() {
 		if ( null === self::$instance ) {
@@ -97,30 +97,30 @@ final class Dhee_Vedic_Calendar {
 	public static function defaults() {
 		return array(
 			'post_types' => array( 'post', 'page' ),
-			'format'     => '{month} {day}, Kali Yuga {year}',
+			'format'     => '{month} {day}, KaliYuga {year}',
 		);
 	}
 
 	/**
-	 * The twelve solar months, Mesha first: the Kali Yuga year begins with
+	 * The twelve solar months, Mesha first: the KaliYuga year begins with
 	 * Mesha, at Vishu.
 	 *
 	 * @return string[]
 	 */
 	public static function month_names() {
 		return array(
-			_x( 'Mesha', 'solar month', 'dhee-vedic-calendar' ),
-			_x( 'Vrishabha', 'solar month', 'dhee-vedic-calendar' ),
-			_x( 'Mithuna', 'solar month', 'dhee-vedic-calendar' ),
-			_x( 'Karkataka', 'solar month', 'dhee-vedic-calendar' ),
-			_x( 'Simha', 'solar month', 'dhee-vedic-calendar' ),
-			_x( 'Kanya', 'solar month', 'dhee-vedic-calendar' ),
-			_x( 'Tula', 'solar month', 'dhee-vedic-calendar' ),
-			_x( 'Vrishchika', 'solar month', 'dhee-vedic-calendar' ),
-			_x( 'Dhanu', 'solar month', 'dhee-vedic-calendar' ),
-			_x( 'Makara', 'solar month', 'dhee-vedic-calendar' ),
-			_x( 'Kumbha', 'solar month', 'dhee-vedic-calendar' ),
-			_x( 'Meena', 'solar month', 'dhee-vedic-calendar' ),
+			_x( 'Mesha', 'solar month', 'vedic-calendar' ),
+			_x( 'Vrishabha', 'solar month', 'vedic-calendar' ),
+			_x( 'Mithuna', 'solar month', 'vedic-calendar' ),
+			_x( 'Karkataka', 'solar month', 'vedic-calendar' ),
+			_x( 'Simha', 'solar month', 'vedic-calendar' ),
+			_x( 'Kanya', 'solar month', 'vedic-calendar' ),
+			_x( 'Tula', 'solar month', 'vedic-calendar' ),
+			_x( 'Vrishchika', 'solar month', 'vedic-calendar' ),
+			_x( 'Dhanu', 'solar month', 'vedic-calendar' ),
+			_x( 'Makara', 'solar month', 'vedic-calendar' ),
+			_x( 'Kumbha', 'solar month', 'vedic-calendar' ),
+			_x( 'Meena', 'solar month', 'vedic-calendar' ),
 		);
 	}
 
@@ -159,9 +159,9 @@ final class Dhee_Vedic_Calendar {
 	 * The one rule of style the line needs: it sits below the date.
 	 */
 	public function enqueue() {
-		wp_register_style( 'dhee-vedic-calendar', false, array(), DHEE_VEDIC_CALENDAR_VERSION );
-		wp_enqueue_style( 'dhee-vedic-calendar' );
-		wp_add_inline_style( 'dhee-vedic-calendar', '.dhee-vedic-date{display:block;font-size:.85em;line-height:1.5;opacity:.85}' );
+		wp_register_style( 'vedic-calendar', false, array(), VEDIC_CALENDAR_VERSION );
+		wp_enqueue_style( 'vedic-calendar' );
+		wp_add_inline_style( 'vedic-calendar', '.vedic-calendar-date{display:block;font-size:.85em;line-height:1.5;opacity:.85}' );
 	}
 
 	/**
@@ -371,12 +371,12 @@ final class Dhee_Vedic_Calendar {
 	 */
 	private function html( $ymd ) {
 		$label = self::label( $ymd );
-		return '' === $label ? '' : '<span class="dhee-vedic-date">' . esc_html( $label ) . '</span>';
+		return '' === $label ? '' : '<span class="vedic-calendar-date">' . esc_html( $label ) . '</span>';
 	}
 
 	/**
 	 * The Vedic date of a Gregorian date, in the format from the settings,
-	 * e.g. "Tula 17, Kali Yuga 5127".
+	 * e.g. "Tula 17, KaliYuga 5127".
 	 *
 	 * @param string $ymd Y-m-d.
 	 * @return string Empty for a date that does not exist.
@@ -404,11 +404,11 @@ final class Dhee_Vedic_Calendar {
 		 * Filters the Vedic date before it is shown.
 		 *
 		 * @param string $label The date, formatted.
-		 * @param array  $solar Kali Yuga year, month (0 = Mesha ... 11 = Meena),
+		 * @param array  $solar KaliYuga year, month (0 = Mesha ... 11 = Meena),
 		 *                      day, and Y-m-d of the month's first day.
 		 * @param string $ymd   The Gregorian date, Y-m-d.
 		 */
-		$label = (string) apply_filters( 'dhee_vedic_calendar_label', $label, $solar, $ymd );
+		$label = (string) apply_filters( 'vedic_calendar_label', $label, $solar, $ymd );
 
 		$self->labels[ $ymd ] = $label;
 		return $label;
@@ -418,7 +418,7 @@ final class Dhee_Vedic_Calendar {
 	 * The solar date of a Gregorian date, cached.
 	 *
 	 * @param string $ymd Y-m-d.
-	 * @return array|null See Dhee_Vedic_Calendar_Astronomy::solar_date().
+	 * @return array|null See Vedic_Calendar_Astronomy::solar_date().
 	 */
 	public static function solar_date( $ymd ) {
 		if ( ! preg_match( '/^(\d{4})-(\d{2})-(\d{2})$/', $ymd, $m ) || ! checkdate( (int) $m[2], (int) $m[3], (int) $m[1] ) ) {
@@ -433,7 +433,7 @@ final class Dhee_Vedic_Calendar {
 		 * @param array $place array( 'latitude' => degrees north, 'longitude' => degrees east ).
 		 */
 		$place = apply_filters(
-			'dhee_vedic_calendar_location',
+			'vedic_calendar_location',
 			array(
 				'latitude'  => 8.5241,
 				'longitude' => 76.9366,
@@ -443,10 +443,10 @@ final class Dhee_Vedic_Calendar {
 		$lon = isset( $place['longitude'] ) ? (float) $place['longitude'] : 76.9366;
 
 		$key   = $ymd . '|' . $lat . '|' . $lon;
-		$solar = wp_cache_get( $key, 'dhee_vedic_calendar' );
+		$solar = wp_cache_get( $key, 'vedic_calendar' );
 		if ( ! is_array( $solar ) ) {
-			$solar = Dhee_Vedic_Calendar_Astronomy::solar_date( (int) $m[1], (int) $m[2], (int) $m[3], $lat, $lon );
-			wp_cache_set( $key, $solar, 'dhee_vedic_calendar', DAY_IN_SECONDS );
+			$solar = Vedic_Calendar_Astronomy::solar_date( (int) $m[1], (int) $m[2], (int) $m[3], $lat, $lon );
+			wp_cache_set( $key, $solar, 'vedic_calendar', DAY_IN_SECONDS );
 		}
 		return $solar;
 	}
@@ -458,9 +458,9 @@ final class Dhee_Vedic_Calendar {
  * @param string|null $ymd Y-m-d; the current post's date when left out.
  * @return string
  */
-function dhee_vedic_date( $ymd = null ) {
+function vedic_calendar_date( $ymd = null ) {
 	if ( null === $ymd ) {
 		$ymd = get_post_time( 'Y-m-d' );
 	}
-	return is_string( $ymd ) ? Dhee_Vedic_Calendar::label( $ymd ) : '';
+	return is_string( $ymd ) ? Vedic_Calendar::label( $ymd ) : '';
 }
