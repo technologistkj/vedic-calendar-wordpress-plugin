@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Builds dist/vedic-calendar-<version>.zip, leaving out what .distignore lists.
+"""Builds dist/aindram-vedic-calendar-<version>.zip, leaving out what .distignore lists.
 
     python3 bin/build-zip.py
 
 The version comes from the plugin header, and the zip holds one top-level
-folder, vedic-calendar/, which is what WordPress's "Upload Plugin" and the
+folder, aindram-vedic-calendar/, which is what WordPress's "Upload Plugin" and the
 wordpress.org directory both expect.
 """
 import os
@@ -13,7 +13,7 @@ import sys
 import zipfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SLUG = 'vedic-calendar'
+SLUG = 'aindram-vedic-calendar'
 
 
 def main():

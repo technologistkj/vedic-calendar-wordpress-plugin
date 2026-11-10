@@ -19,7 +19,7 @@
  * 2100: sankranti times within 12 seconds, sunrise and sunset within 16
  * seconds, and all 2,412 month starts on the same day. See tests/.
  *
- * @package VedicCalendar
+ * @package AindramVedicCalendar
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -27,7 +27,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Pure functions; no WordPress calls, so the tests can run them in plain PHP.
  */
-final class Vedic_Calendar_Astronomy {
+final class Aindram_Vedic_Calendar_Astronomy {
 
 	/**
 	 * Kerala's clock, UTC+5:30, as a fraction of a day.

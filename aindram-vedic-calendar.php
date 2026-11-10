@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       Vedic Calendar
+ * Plugin Name:       Aindram Vedic Calendar
  * Plugin URI:        https://github.com/technologistkj/vedic-calendar-wordpress-plugin
  * Description:       Shows the Vedic date below the date of every post and page: the Kerala solar month by its Sanskrit name, the day of the month, and the KaliYuga year, which begins at Vishu.
  * Version:           1.0.0
@@ -10,7 +10,7 @@
  * Author URI:        https://profiles.wordpress.org/aindram/
  * License:           GPL-2.0-only
  * License URI:       https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
- * Text Domain:       vedic-calendar
+ * Text Domain:       aindram-vedic-calendar
  *
  * Copyright (C) 2026 Aindram.
  *
@@ -20,21 +20,21 @@
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE. See LICENSE.txt for the full licence.
  *
- * @package VedicCalendar
+ * @package AindramVedicCalendar
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'VEDIC_CALENDAR_VERSION', '1.0.0' );
-define( 'VEDIC_CALENDAR_FILE', __FILE__ );
-define( 'VEDIC_CALENDAR_DIR', plugin_dir_path( __FILE__ ) );
+define( 'AINDRAM_VEDIC_CALENDAR_VERSION', '1.0.0' );
+define( 'AINDRAM_VEDIC_CALENDAR_FILE', __FILE__ );
+define( 'AINDRAM_VEDIC_CALENDAR_DIR', plugin_dir_path( __FILE__ ) );
 
-require_once VEDIC_CALENDAR_DIR . 'includes/class-vedic-calendar-astronomy.php';
-require_once VEDIC_CALENDAR_DIR . 'includes/class-vedic-calendar.php';
-require_once VEDIC_CALENDAR_DIR . 'includes/class-vedic-calendar-settings.php';
+require_once AINDRAM_VEDIC_CALENDAR_DIR . 'includes/class-aindram-vedic-calendar-astronomy.php';
+require_once AINDRAM_VEDIC_CALENDAR_DIR . 'includes/class-aindram-vedic-calendar.php';
+require_once AINDRAM_VEDIC_CALENDAR_DIR . 'includes/class-aindram-vedic-calendar-settings.php';
 
-Vedic_Calendar::instance();
+Aindram_Vedic_Calendar::instance();
 
 if ( is_admin() ) {
-	Vedic_Calendar_Settings::instance();
+	Aindram_Vedic_Calendar_Settings::instance();
 }

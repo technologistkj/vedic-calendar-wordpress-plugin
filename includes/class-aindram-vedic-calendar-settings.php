@@ -1,8 +1,8 @@
 <?php
 /**
- * Settings > Vedic Calendar.
+ * Settings > Aindram Vedic Calendar.
  *
- * @package VedicCalendar
+ * @package AindramVedicCalendar
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -10,21 +10,21 @@ defined( 'ABSPATH' ) || exit;
 /**
  * The settings page.
  */
-final class Vedic_Calendar_Settings {
+final class Aindram_Vedic_Calendar_Settings {
 
-	const PAGE = 'vedic-calendar';
+	const PAGE = 'aindram-vedic-calendar';
 
 	/**
 	 * The one instance.
 	 *
-	 * @var Vedic_Calendar_Settings|null
+	 * @var Aindram_Vedic_Calendar_Settings|null
 	 */
 	private static $instance = null;
 
 	/**
 	 * The settings page, created once.
 	 *
-	 * @return Vedic_Calendar_Settings
+	 * @return Aindram_Vedic_Calendar_Settings
 	 */
 	public static function instance() {
 		if ( null === self::$instance ) {
@@ -39,16 +39,16 @@ final class Vedic_Calendar_Settings {
 	private function __construct() {
 		add_action( 'admin_menu', array( $this, 'menu' ) );
 		add_action( 'admin_init', array( $this, 'register' ) );
-		add_filter( 'plugin_action_links_' . plugin_basename( VEDIC_CALENDAR_FILE ), array( $this, 'action_links' ) );
+		add_filter( 'plugin_action_links_' . plugin_basename( AINDRAM_VEDIC_CALENDAR_FILE ), array( $this, 'action_links' ) );
 	}
 
 	/**
-	 * Settings > Vedic Calendar.
+	 * Settings > Aindram Vedic Calendar.
 	 */
 	public function menu() {
 		add_options_page(
-			__( 'Vedic Calendar', 'vedic-calendar' ),
-			__( 'Vedic Calendar', 'vedic-calendar' ),
+			__( 'Aindram Vedic Calendar', 'aindram-vedic-calendar' ),
+			__( 'Aindram Vedic Calendar', 'aindram-vedic-calendar' ),
 			'manage_options',
 			self::PAGE,
 			array( $this, 'render_page' )
@@ -63,7 +63,7 @@ final class Vedic_Calendar_Settings {
 	 */
 	public function action_links( $links ) {
 		$url = admin_url( 'options-general.php?page=' . self::PAGE );
-		array_unshift( $links, '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Settings', 'vedic-calendar' ) . '</a>' );
+		array_unshift( $links, '<a href="' . esc_url( $url ) . '">' . esc_html__( 'Settings', 'aindram-vedic-calendar' ) . '</a>' );
 		return $links;
 	}
 
@@ -73,17 +73,17 @@ final class Vedic_Calendar_Settings {
 	public function register() {
 		register_setting(
 			self::PAGE,
-			Vedic_Calendar::OPTION,
+			Aindram_Vedic_Calendar::OPTION,
 			array(
 				'type'              => 'array',
 				'sanitize_callback' => array( $this, 'sanitize' ),
-				'default'           => Vedic_Calendar::defaults(),
+				'default'           => Aindram_Vedic_Calendar::defaults(),
 			)
 		);
 
-		add_settings_section( 'dvc_main', '', array( $this, 'section' ), self::PAGE );
-		add_settings_field( 'post_types', __( 'Show on', 'vedic-calendar' ), array( $this, 'field_post_types' ), self::PAGE, 'dvc_main' );
-		add_settings_field( 'format', __( 'Format', 'vedic-calendar' ), array( $this, 'field_format' ), self::PAGE, 'dvc_main', array( 'label_for' => 'dvc-format' ) );
+		add_settings_section( 'avc_main', '', array( $this, 'section' ), self::PAGE );
+		add_settings_field( 'post_types', __( 'Show on', 'aindram-vedic-calendar' ), array( $this, 'field_post_types' ), self::PAGE, 'avc_main' );
+		add_settings_field( 'format', __( 'Format', 'aindram-vedic-calendar' ), array( $this, 'field_format' ), self::PAGE, 'avc_main', array( 'label_for' => 'avc-format' ) );
 	}
 
 	/**
@@ -110,7 +110,7 @@ final class Vedic_Calendar_Settings {
 
 		$format = isset( $input['format'] ) ? sanitize_text_field( $input['format'] ) : '';
 		if ( '' === $format ) {
-			$format = Vedic_Calendar::defaults()['format'];
+			$format = Aindram_Vedic_Calendar::defaults()['format'];
 		}
 
 		return array(
@@ -123,16 +123,16 @@ final class Vedic_Calendar_Settings {
 	 * What the plugin shows, and how it reckons it.
 	 */
 	public function section() {
-		echo '<p>' . esc_html__( 'Below the date a post or page shows, a second line gives the same day in the Vedic calendar: the Kerala solar month and day, and the KaliYuga year.', 'vedic-calendar' ) . '</p>';
+		echo '<p>' . esc_html__( 'Below the date a post or page shows, a second line gives the same day in the Vedic calendar: the Kerala solar month and day, and the KaliYuga year.', 'aindram-vedic-calendar' ) . '</p>';
 		echo '<ul style="list-style:disc;margin-left:2em">';
-		echo '<li>' . esc_html__( 'A month begins when the Sun enters a sidereal sign (Lahiri ayanamsa). The months carry the Sanskrit names of their signs: Mesha, Vrishabha, Mithuna, Karkataka, Simha, Kanya, Tula, Vrishchika, Dhanu, Makara, Kumbha, Meena.', 'vedic-calendar' ) . '</li>';
-		echo '<li>' . esc_html__( 'Kerala’s rule decides the first day: if the Sun enters the sign within the first three fifths of the daytime, the month begins that day; otherwise it begins the next day.', 'vedic-calendar' ) . '</li>';
-		echo '<li>' . esc_html__( 'The KaliYuga year begins at Vishu, the first day of Mesha.', 'vedic-calendar' ) . '</li>';
+		echo '<li>' . esc_html__( 'A month begins when the Sun enters a sidereal sign (Lahiri ayanamsa). The months carry the Sanskrit names of their signs: Mesha, Vrishabha, Mithuna, Karkataka, Simha, Kanya, Tula, Vrishchika, Dhanu, Makara, Kumbha, Meena.', 'aindram-vedic-calendar' ) . '</li>';
+		echo '<li>' . esc_html__( 'Kerala’s rule decides the first day: if the Sun enters the sign within the first three fifths of the daytime, the month begins that day; otherwise it begins the next day.', 'aindram-vedic-calendar' ) . '</li>';
+		echo '<li>' . esc_html__( 'The KaliYuga year begins at Vishu, the first day of Mesha.', 'aindram-vedic-calendar' ) . '</li>';
 		echo '</ul>';
 		printf(
 			'<p><strong>%1$s</strong> %2$s</p>',
-			esc_html__( 'Today:', 'vedic-calendar' ),
-			esc_html( wp_date( get_option( 'date_format' ) ) . ' — ' . Vedic_Calendar::label( current_time( 'Y-m-d' ) ) )
+			esc_html__( 'Today:', 'aindram-vedic-calendar' ),
+			esc_html( wp_date( get_option( 'date_format' ) ) . ' — ' . Aindram_Vedic_Calendar::label( current_time( 'Y-m-d' ) ) )
 		);
 	}
 
@@ -140,12 +140,12 @@ final class Vedic_Calendar_Settings {
 	 * Which post types get the line.
 	 */
 	public function field_post_types() {
-		$o = Vedic_Calendar::options();
-		echo '<fieldset><legend class="screen-reader-text">' . esc_html__( 'Show on', 'vedic-calendar' ) . '</legend>';
+		$o = Aindram_Vedic_Calendar::options();
+		echo '<fieldset><legend class="screen-reader-text">' . esc_html__( 'Show on', 'aindram-vedic-calendar' ) . '</legend>';
 		foreach ( $this->post_types() as $name => $type ) {
 			printf(
 				'<label style="display:inline-block;margin:0 1.5em .4em 0"><input type="checkbox" name="%1$s[post_types][]" value="%2$s"%3$s> %4$s</label>',
-				esc_attr( Vedic_Calendar::OPTION ),
+				esc_attr( Aindram_Vedic_Calendar::OPTION ),
 				esc_attr( $name ),
 				checked( in_array( $name, (array) $o['post_types'], true ), true, false ),
 				esc_html( $type->labels->name )
@@ -158,13 +158,13 @@ final class Vedic_Calendar_Settings {
 	 * How the line is written.
 	 */
 	public function field_format() {
-		$o = Vedic_Calendar::options();
+		$o = Aindram_Vedic_Calendar::options();
 		printf(
-			'<input type="text" class="regular-text" id="dvc-format" name="%1$s[format]" value="%2$s">',
-			esc_attr( Vedic_Calendar::OPTION ),
+			'<input type="text" class="regular-text" id="avc-format" name="%1$s[format]" value="%2$s">',
+			esc_attr( Aindram_Vedic_Calendar::OPTION ),
 			esc_attr( $o['format'] )
 		);
-		echo '<p class="description">' . esc_html__( '{month} is the month, {day} the day of the month, {year} the KaliYuga year.', 'vedic-calendar' ) . '</p>';
+		echo '<p class="description">' . esc_html__( '{month} is the month, {day} the day of the month, {year} the KaliYuga year.', 'aindram-vedic-calendar' ) . '</p>';
 	}
 
 	/**
