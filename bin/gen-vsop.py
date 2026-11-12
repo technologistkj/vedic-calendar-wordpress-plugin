@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
 """Writes includes/vsop87-earth-l.php: the VSOP87D series for the Earth's
-heliocentric longitude, cut down to the terms that matter for 1800-2200.
+heliocentric longitude, cut down to the terms that matter for 1900-2600.
 
     python3 -m venv /tmp/v && /tmp/v/bin/pip install pymeeus
     /tmp/v/bin/python bin/gen-vsop.py
 
 A term is kept when its amplitude, times 0.3 to the power of its series, is at
-least 5e-8 radians. That keeps 149 of 1,080 terms and stays within 0.15
-arcseconds of the full series between 1800 and 2200 (measured over 4,001
-dates), i.e. a few seconds of time in a sankranti.
+least 2e-8 radians. That keeps 207 of 1,080 terms. Measured against Swiss
+Ephemeris over 1900-2600, sankranti times come out within 3.3 s, which the full
+series does not improve on (3.6 s); with the earlier cut, 149 terms, they were
+within 5.5 s.
 """
 import os
 from pymeeus import Earth
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-THRESHOLD = 5.0
+THRESHOLD = 2.0
 
 series = [[t for t in terms if t[0] * (0.3 ** p) >= THRESHOLD] for p, terms in enumerate(Earth.VSOP87_L)]
 

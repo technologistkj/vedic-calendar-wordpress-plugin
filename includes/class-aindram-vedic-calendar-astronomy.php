@@ -16,8 +16,8 @@
  * at Vishu in April 2026 is Kali 5127.
  *
  * Checked against Swiss Ephemeris (Lahiri) for every sankranti from 1900 to
- * 2100: sankranti times within 12 seconds, sunrise and sunset within 16
- * seconds, and all 2,412 month starts on the same day. See tests/.
+ * 2600: sankranti times within 4 seconds, the first-day cutoff within half a
+ * second, and all 8,409 month starts on the same day. See tests/.
  *
  * @package AindramVedicCalendar
  */
@@ -45,6 +45,13 @@ final class Aindram_Vedic_Calendar_Astronomy {
 	 * @var array|null
 	 */
 	private static $vsop = null;
+
+	/**
+	 * Delta T table, loaded on first use.
+	 *
+	 * @var array|null
+	 */
+	private static $delta_t = null;
 
 	/**
 	 * The solar date for a Gregorian date.
@@ -75,9 +82,9 @@ final class Aindram_Vedic_Calendar_Astronomy {
 			++$start;
 		}
 
-		// Mesha begins in mid-April in every century this plugin will meet, so
-		// stepping back $sign months from this month's start lands in that
-		// April, well clear of New Year.
+		// Mesha begins between mid- and late April from 1900 to 2700 (it moves a
+		// day every 70 years or so), so stepping back $sign months from this
+		// month's start lands in that April, well clear of New Year.
 		$mesha = self::ymd_from_jd( $start - $sign * 30.4368 );
 
 		return array(
@@ -123,7 +130,9 @@ final class Aindram_Vedic_Calendar_Astronomy {
 	}
 
 	/**
-	 * Sunrise and sunset, upper limb on the horizon with standard refraction.
+	 * Sunrise and sunset: the upper limb on the horizon, with the refraction
+	 * Swiss Ephemeris applies at 1013.25 hPa and 27 C (31.29') and the Sun's
+	 * semidiameter that day (15.73' to 16.27'), as the almanacs reckon it.
 	 *
 	 * @param float $date      Julian day at 0h UT of the date. For India the
 	 *                         UT date and the local date agree at local noon.
@@ -132,14 +141,14 @@ final class Aindram_Vedic_Calendar_Astronomy {
 	 * @return float[] array( sunrise, sunset ), Julian days UT.
 	 */
 	public static function rise_set( $date, $latitude, $longitude ) {
-		$h0  = deg2rad( -0.8333 );
 		$phi = deg2rad( $latitude );
 		$out = array();
 		foreach ( array( -1, 1 ) as $side ) {
 			$t = $date + 0.5 - $longitude / 360;
 			for ( $i = 0; $i < 3; $i++ ) {
-				list( $dec, $eot ) = self::sun_low( $t );
+				list( $dec, $eot, $r ) = self::sun_low( $t );
 				$d     = deg2rad( $dec );
+				$h0    = deg2rad( -( 31.29 + 15.994 / $r ) / 60 );
 				$cos_h = ( sin( $h0 ) - sin( $phi ) * sin( $d ) ) / ( cos( $phi ) * cos( $d ) );
 				$h     = rad2deg( acos( max( -1.0, min( 1.0, $cos_h ) ) ) );
 				$t     = $date + ( 720 - 4 * $longitude - $eot + $side * 4 * $h ) / 1440;
@@ -150,36 +159,54 @@ final class Aindram_Vedic_Calendar_Astronomy {
 	}
 
 	/**
-	 * The Sun's apparent declination and the equation of time, to the
-	 * precision sunrise needs (Meeus, Astronomical Algorithms, ch. 25).
+	 * The Sun's apparent declination and the equation of time, from the same
+	 * longitude the months are reckoned with, plus nutation (Meeus, Astronomical
+	 * Algorithms, ch. 22, 25 and 28).
 	 *
-	 * @param float $jd Julian day.
-	 * @return float[] array( declination in degrees, equation of time in minutes ).
+	 * @param float $jd Julian day, UT.
+	 * @return float[] array( declination in degrees, equation of time in minutes,
+	 *                 distance in astronomical units ).
 	 */
 	public static function sun_low( $jd ) {
-		$t     = ( $jd - 2451545 ) / 36525;
-		$l0    = fmod( 280.46646 + 36000.76983 * $t, 360 );
+		$tau   = ( $jd + self::delta_t( 2000 + ( $jd - 2451545 ) / 365.25 ) / 86400 - 2451545 ) / 365250;
+		$t     = 10 * $tau;
+		$l0    = 280.4664567 + ( ( ( ( -$tau / 2000000 - 1 / 15300 ) * $tau + 1 / 49931 ) * $tau + 0.03032028 ) * $tau + 360007.6982779 ) * $tau;
 		$m     = deg2rad( 357.52911 + 35999.05029 * $t );
-		$c     = ( 1.914602 - 0.004817 * $t ) * sin( $m ) + 0.019993 * sin( 2 * $m ) + 0.000289 * sin( 3 * $m );
-		$omega = deg2rad( 125.04 - 1934.136 * $t );
-		$lam   = deg2rad( $l0 + $c - 0.00569 - 0.00478 * sin( $omega ) );
-		$eps   = deg2rad( 23.439291 - 0.0130042 * $t + 0.00256 * cos( $omega ) );
+		$omega = deg2rad( 125.04452 - 1934.136261 * $t );
+		$ls    = deg2rad( 2 * ( 280.4665 + 36000.7698 * $t ) );
+		$lm    = deg2rad( 2 * ( 218.3165 + 481267.8813 * $t ) );
+		$dpsi  = ( -17.20 * sin( $omega ) - 1.32 * sin( $ls ) - 0.23 * sin( $lm ) + 0.21 * sin( 2 * $omega ) ) / 3600;
+		$deps  = ( 9.20 * cos( $omega ) + 0.57 * cos( $ls ) + 0.10 * cos( $lm ) - 0.09 * cos( 2 * $omega ) ) / 3600;
+		$eps   = deg2rad( 23.439291 - 0.0130042 * $t + $deps );
+		$lam   = deg2rad( self::tropical_sun( $jd ) + $dpsi );
 		$ra    = self::wrap360( rad2deg( atan2( cos( $eps ) * sin( $lam ), cos( $lam ) ) ) );
 		$dec   = rad2deg( asin( sin( $eps ) * sin( $lam ) ) );
-		return array( $dec, 4 * self::wrap180( $l0 - 0.0057183 - $ra ) );
+		$r     = 1.000140 - 0.016708 * cos( $m ) - 0.000141 * cos( 2 * $m );
+		return array( $dec, 4 * self::wrap180( $l0 - 0.0057183 - $ra + $dpsi * cos( $eps ) ), $r );
 	}
 
 	/**
 	 * The Sun's sidereal longitude, Lahiri ayanamsa.
 	 *
-	 * Measured from the mean equinox of date, with aberration. Nutation is left
-	 * out on both sides: it moves the equinox and the ayanamsa alike, so the
-	 * sidereal longitude does not contain it.
+	 * Nutation is left out on both sides: it moves the equinox and the ayanamsa
+	 * alike, so the sidereal longitude does not contain it.
 	 *
 	 * @param float $jd Julian day, UT.
 	 * @return float Degrees, 0 to 360.
 	 */
 	public static function sidereal_sun( $jd ) {
+		$jde = $jd + self::delta_t( 2000 + ( $jd - 2451545 ) / 365.25 ) / 86400;
+		return self::wrap360( self::tropical_sun( $jd ) - self::lahiri( $jde ) );
+	}
+
+	/**
+	 * The Sun's geocentric longitude from the mean equinox of date (IAU 2006),
+	 * with aberration, without nutation.
+	 *
+	 * @param float $jd Julian day, UT.
+	 * @return float Degrees, 0 to 360.
+	 */
+	public static function tropical_sun( $jd ) {
 		if ( null === self::$vsop ) {
 			self::$vsop = require __DIR__ . '/vsop87-earth-l.php';
 		}
@@ -202,13 +229,19 @@ final class Aindram_Vedic_Calendar_Astronomy {
 		$r      = 1.000140 - 0.016708 * cos( $m ) - 0.000141 * cos( 2 * $m );
 		$lambda = rad2deg( $l * 1e-8 ) + 180 + ( -0.09033 - 20.4898 / $r ) / 3600;
 
-		return self::wrap360( $lambda - self::lahiri( $jde ) );
+		// VSOP87D's equinox of date moves with Lieske's (1977) precession, the
+		// ayanamsa with IAU 2006's, which is 0.3" a century slower. Without this
+		// the two drift apart: two arcseconds, a minute of sankranti, by 2600.
+		$t       = $tau * 10;
+		$lambda += ( self::precession( $t ) - ( ( -0.000006 * $t + 1.11113 ) * $t + 5029.0966 ) * $t ) / 3600;
+
+		return self::wrap360( $lambda );
 	}
 
 	/**
-	 * The mean Lahiri ayanamsa: 23 deg 14' 43.89" at 1956 March 21, 0h TT (the
-	 * Indian Calendar Reform Committee's value, as Swiss Ephemeris holds it),
-	 * carried by the IAU 2006 general precession in longitude.
+	 * The mean Lahiri ayanamsa: 23 deg 14' 44.02" at 1956 March 21, 0h TT, the
+	 * Indian Calendar Reform Committee's value as Swiss Ephemeris 2.10 gives it
+	 * without nutation, carried by the IAU 2006 general precession in longitude.
 	 *
 	 * @param float $jde Julian ephemeris day.
 	 * @return float Degrees.
@@ -216,7 +249,7 @@ final class Aindram_Vedic_Calendar_Astronomy {
 	public static function lahiri( $jde ) {
 		$t  = ( $jde - 2451545 ) / 36525;
 		$t0 = ( 2435553.5 - 2451545 ) / 36525;
-		return 23.245524743 + ( self::precession( $t ) - self::precession( $t0 ) ) / 3600;
+		return 23.245560955 + ( self::precession( $t ) - self::precession( $t0 ) ) / 3600;
 	}
 
 	/**
@@ -230,50 +263,35 @@ final class Aindram_Vedic_Calendar_Astronomy {
 	}
 
 	/**
-	 * Delta T (TT - UT) in seconds. Espenak and Meeus up to 2005; after that a
-	 * fit to the values Swiss Ephemeris extrapolates, which follow the Earth's
-	 * rotation as observed into the 2020s (within 1.8 s to 2200). Their 2005-2050
-	 * polynomial overshoots by over a minute by 2050, which would move a
-	 * sankranti by a minute.
+	 * Delta T (TT - UT) in seconds: Swiss Ephemeris's values, every two years
+	 * from 1800 to 2700 (includes/delta-t.php), interpolated linearly, within
+	 * 0.2 s of Swiss Ephemeris. Beyond 2700 and before 1800, the parabola it
+	 * follows there. The future values are Swiss Ephemeris's extrapolation of the
+	 * Earth's rotation, which is what almanacs built on it use.
 	 *
 	 * @param float $y Decimal year.
 	 * @return float
 	 */
 	public static function delta_t( $y ) {
-		if ( $y >= 2005 ) {
-			$t = $y - 2000;
-			return 66.1233 + 0.0597325 * $t + 0.00209369 * $t * $t;
+		if ( null === self::$delta_t ) {
+			self::$delta_t = require __DIR__ . '/delta-t.php';
 		}
-		if ( $y >= 1986 ) {
-			$t = $y - 2000;
-			return 63.86 + 0.3345 * $t - 0.060374 * $t * $t + 0.0017275 * pow( $t, 3 ) + 0.000651814 * pow( $t, 4 ) + 0.00002373599 * pow( $t, 5 );
+		$first  = self::$delta_t['first'];
+		$step   = self::$delta_t['step'];
+		$values = self::$delta_t['values'];
+		$n      = count( $values ) - 1;
+		$last   = $first + $step * $n;
+		if ( $y >= $last ) {
+			$u = $y - $last;
+			return $values[ $n ] + ( self::$delta_t['after'][0] + self::$delta_t['after'][1] * $u ) * $u;
 		}
-		if ( $y >= 1961 ) {
-			$t = $y - 1975;
-			return 45.45 + 1.067 * $t - $t * $t / 260 - pow( $t, 3 ) / 718;
+		if ( $y <= $first ) {
+			$u = $first - $y;
+			return $values[0] + ( self::$delta_t['before'][0] + self::$delta_t['before'][1] * $u ) * $u;
 		}
-		if ( $y >= 1941 ) {
-			$t = $y - 1950;
-			return 29.07 + 0.407 * $t - $t * $t / 233 + pow( $t, 3 ) / 2547;
-		}
-		if ( $y >= 1920 ) {
-			$t = $y - 1920;
-			return 21.20 + 0.84493 * $t - 0.076100 * $t * $t + 0.0020936 * pow( $t, 3 );
-		}
-		if ( $y >= 1900 ) {
-			$t = $y - 1900;
-			return -2.79 + 1.494119 * $t - 0.0598939 * $t * $t + 0.0061966 * pow( $t, 3 ) - 0.000197 * pow( $t, 4 );
-		}
-		if ( $y >= 1860 ) {
-			$t = $y - 1860;
-			return 7.62 + 0.5737 * $t - 0.251754 * $t * $t + 0.01680668 * pow( $t, 3 ) - 0.0004473624 * pow( $t, 4 ) + pow( $t, 5 ) / 233174;
-		}
-		if ( $y >= 1800 ) {
-			$t = $y - 1800;
-			return 13.72 - 0.332447 * $t + 0.0068612 * $t * $t + 0.0041116 * pow( $t, 3 ) - 0.00037436 * pow( $t, 4 ) + 0.0000121272 * pow( $t, 5 ) - 0.0000001699 * pow( $t, 6 ) + 0.000000000875 * pow( $t, 7 );
-		}
-		$u = ( $y - 1820 ) / 100;
-		return -20 + 32 * $u * $u;
+		$x = ( $y - $first ) / $step;
+		$i = min( (int) floor( $x ), $n - 1 );
+		return $values[ $i ] + ( $values[ $i + 1 ] - $values[ $i ] ) * ( $x - $i );
 	}
 
 	/**

@@ -84,6 +84,7 @@ final class Aindram_Vedic_Calendar_Settings {
 		add_settings_section( 'avc_main', '', array( $this, 'section' ), self::PAGE );
 		add_settings_field( 'post_types', __( 'Show on', 'aindram-vedic-calendar' ), array( $this, 'field_post_types' ), self::PAGE, 'avc_main' );
 		add_settings_field( 'format', __( 'Format', 'aindram-vedic-calendar' ), array( $this, 'field_format' ), self::PAGE, 'avc_main', array( 'label_for' => 'avc-format' ) );
+		add_settings_field( 'link', __( 'Link', 'aindram-vedic-calendar' ), array( $this, 'field_link' ), self::PAGE, 'avc_main' );
 	}
 
 	/**
@@ -116,6 +117,7 @@ final class Aindram_Vedic_Calendar_Settings {
 		return array(
 			'post_types' => $types,
 			'format'     => $format,
+			'link'       => ! empty( $input['link'] ),
 		);
 	}
 
@@ -165,6 +167,20 @@ final class Aindram_Vedic_Calendar_Settings {
 			esc_attr( $o['format'] )
 		);
 		echo '<p class="description">' . esc_html__( '{month} is the month, {day} the day of the month, {year} the KaliYuga year.', 'aindram-vedic-calendar' ) . '</p>';
+	}
+
+	/**
+	 * Whether the date links to the plugin's page.
+	 */
+	public function field_link() {
+		$o = Aindram_Vedic_Calendar::options();
+		printf(
+			'<label><input type="checkbox" name="%1$s[link]" value="1"%2$s> %3$s</label>',
+			esc_attr( Aindram_Vedic_Calendar::OPTION ),
+			checked( ! empty( $o['link'] ), true, false ),
+			esc_html__( 'Link the Vedic date to the plugin’s page on WordPress.org', 'aindram-vedic-calendar' )
+		);
+		echo '<p class="description">' . esc_html__( 'A reader who clicks the date opens a page describing the plugin, with a button to get it for their own site. Where your theme already makes the date a link to the post, that link stays and the Vedic date is not linked.', 'aindram-vedic-calendar' ) . '</p>';
 	}
 
 	/**

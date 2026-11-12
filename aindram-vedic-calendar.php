@@ -3,7 +3,7 @@
  * Plugin Name:       Aindram Vedic Calendar
  * Plugin URI:        https://github.com/technologistkj/vedic-calendar-wordpress-plugin
  * Description:       Shows the Vedic date below the date of every post and page: the Kerala solar month by its Sanskrit name, the day of the month, and the KaliYuga year, which begins at Vishu.
- * Version:           1.0.0
+ * Version:           1.1.0
  * Requires at least: 5.9
  * Requires PHP:      7.2
  * Author:            Aindram
@@ -25,7 +25,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'AINDRAM_VEDIC_CALENDAR_VERSION', '1.0.0' );
+define( 'AINDRAM_VEDIC_CALENDAR_VERSION', '1.1.0' );
 define( 'AINDRAM_VEDIC_CALENDAR_FILE', __FILE__ );
 define( 'AINDRAM_VEDIC_CALENDAR_DIR', plugin_dir_path( __FILE__ ) );
 

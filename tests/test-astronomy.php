@@ -5,9 +5,10 @@
  *
  *     docker run --rm -v "$PWD":/p -w /p php:7.2-cli php tests/test-astronomy.php
  *
- * For every month start in fixtures/month-starts.txt (1900-2100), that date must
+ * For every month start in fixtures/month-starts.txt (1900-2600), that date must
  * be day 1 of that month in that Kali year, and the day before must be the last
- * day of the month before. Exits non-zero on any failure.
+ * day of the month before. The sankranti must fall within 5 s of Swiss
+ * Ephemeris's, and the cutoff within 1 s. Exits non-zero on any failure.
  *
  * @package AindramVedicCalendar
  */
@@ -19,6 +20,8 @@ $lat      = 8.5241;
 $lon      = 76.9366;
 $failures = array();
 $checked  = 0;
+$worst_s  = 0.0;
+$worst_c  = 0.0;
 $started  = microtime( true );
 
 $lines = file( __DIR__ . '/fixtures/month-starts.txt', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
@@ -34,6 +37,17 @@ foreach ( $lines as $line ) {
 
 	$got = Aindram_Vedic_Calendar_Astronomy::solar_date( $y, $m, $d, $lat, $lon );
 	++$checked;
+
+	// Timing: the sankranti and that day's cutoff against Swiss Ephemeris.
+	$sankranti = Aindram_Vedic_Calendar_Astronomy::sankranti_before( (float) $f[5] + 0.5, $sign );
+	$cutoff    = Aindram_Vedic_Calendar_Astronomy::cutoff( Aindram_Vedic_Calendar_Astronomy::ist_date( (float) $f[6] ), $lat, $lon );
+	$off_s     = ( $sankranti - (float) $f[5] ) * 86400;
+	$off_c     = ( $cutoff - (float) $f[6] ) * 86400;
+	$worst_s   = max( $worst_s, abs( $off_s ) );
+	$worst_c   = max( $worst_c, abs( $off_c ) );
+	if ( abs( $off_s ) > 5 || abs( $off_c ) > 1 ) {
+		$failures[] = sprintf( '%s: sankranti off by %.1f s, cutoff by %.1f s', $f[0], $off_s, $off_c );
+	}
 	if ( 1 !== $got['day'] || $sign !== $got['month'] || $kali !== $got['year'] ) {
 		$failures[] = sprintf( '%s: want sign %d day 1 Kali %d, got sign %d day %d Kali %d (cutoff margin %s min)', $f[0], $sign, $kali, $got['month'], $got['day'], $got['year'], $f[4] );
 	}
@@ -74,8 +88,8 @@ foreach ( file( __DIR__ . '/fixtures/published.txt', FILE_IGNORE_NEW_LINES | FIL
 	}
 }
 
-// Round trip of the calendar arithmetic over 1800-2200.
-for ( $jd = 2378496.5; $jd < 2524593.5; $jd += 1 ) {
+// Round trip of the calendar arithmetic over 1800-2700.
+for ( $jd = 2378496.5; $jd < 2707100.5; $jd += 1 ) {
 	list( $y, $m, $d ) = Aindram_Vedic_Calendar_Astronomy::ymd_from_jd( $jd );
 	if ( Aindram_Vedic_Calendar_Astronomy::jd_from_ymd( $y, $m, $d ) !== $jd || ! checkdate( $m, $d, $y ) ) {
 		$failures[] = "date round trip fails at JD $jd";
@@ -84,7 +98,7 @@ for ( $jd = 2378496.5; $jd < 2524593.5; $jd += 1 ) {
 }
 
 $today = Aindram_Vedic_Calendar_Astronomy::solar_date( 2026, 11, 3, $lat, $lon );
-printf( "PHP %s: %d dates checked, %d failures, %.2f ms per date; 2026-11-03 = sign %d day %d Kali %d\n", PHP_VERSION, $checked, count( $failures ), 1000 * $elapsed / max( 1, $checked - 17 ), $today['month'], $today['day'], $today['year'] );
+printf( "PHP %s: %d dates checked, %d failures, %.2f ms per date; sankranti within %.1f s, cutoff within %.1f s of Swiss Ephemeris; 2026-11-03 = sign %d day %d Kali %d\n", PHP_VERSION, $checked, count( $failures ), 1000 * $elapsed / max( 1, $checked - 17 ), $worst_s, $worst_c, $today['month'], $today['day'], $today['year'] );
 foreach ( array_slice( $failures, 0, 20 ) as $failure ) {
 	echo '  FAIL ', $failure, "\n";
 }

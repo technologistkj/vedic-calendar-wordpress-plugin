@@ -4,7 +4,7 @@ Tags: calendar, vedic, kerala, malayalam, panchang
 Requires at least: 5.9
 Tested up to: 7.1
 Requires PHP: 7.2
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 License: GPL-2.0-only
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -20,7 +20,7 @@ Under the date your theme already shows on a post or page, Aindram Vedic Calenda
 * **Months** are Kerala's solar months, named by their signs in Sanskrit: Mesha, Vrishabha, Mithuna, Karkataka, Simha, Kanya, Tula, Vrishchika, Dhanu, Makara, Kumbha, Meena. Mesha is the month Kerala calls Medam, Simha is Chingam, and so on.
 * **Years** are KaliYuga years. The year begins at Vishu, the first day of Mesha. The year that began at Vishu in April 2026 is KaliYuga 5127.
 
-It works with block themes and classic themes, with no setup. Choose the post types and the wording in Settings > Aindram Vedic Calendar.
+It works with block themes and classic themes, with no setup. Choose the post types and the wording in Settings > Aindram Vedic Calendar. You can also link the date to this plugin's page, so a reader who wonders what it is can find out; that is off unless you turn it on.
 
 = How the date is reckoned =
 
@@ -30,7 +30,9 @@ Kerala's rule then fixes the first day of the month. The daytime, sunrise to sun
 
 = Accuracy =
 
-Every month start from 1900 to 2100, 2,409 of them, was checked against Swiss Ephemeris with the same rule: all fall on the same day. Sankranti times agree within 12 seconds. The month starts also match the Malayalam calendar Kerala Tourism publishes for 2024-25.
+Every month start from 1900 to 2600, 8,409 of them, was checked against Swiss Ephemeris with the same rule: all fall on the same day. Sankranti times agree within 4 seconds, and the first-day cut-off within half a second. The month starts also match the Malayalam calendar Kerala Tourism publishes for 2024-25.
+
+Dates centuries ahead depend on how much the Earth's rotation will have slowed, which nobody can know. The plugin uses the same forecast as Swiss Ephemeris, so its future dates agree with almanacs built on it.
 
 Almanacs that use a different ayanamsa or their own reckoning of sunrise can differ by a day when a sankranti falls within minutes of the cut-off.
 
@@ -62,11 +64,19 @@ Settings > Aindram Vedic Calendar has a format field: `{month}`, `{day}` and `{y
 
 Yes, with the `aindram_vedic_calendar_location` filter, which takes an array with `latitude` and `longitude`. Anywhere in Kerala gives the same months on all but the rarest days.
 
+= Does it add links to my site? =
+
+Not unless you choose to. Settings > Aindram Vedic Calendar has a Link option, off by default. When it is on, the Vedic date links to this plugin's page on WordPress.org, opening in a new tab. Where your theme already makes the date a link to the post, the theme's link is kept and the Vedic date is not linked. Developers can point the link elsewhere with the `aindram_vedic_calendar_link` filter.
+
 = Does it work with caching plugins? =
 
 Yes. The line is part of the page HTML, so a cached page carries it.
 
 == Changelog ==
+
+= 1.1.0 =
+* Dates checked against Swiss Ephemeris to 2600, up from 2100: the Earth's slowing rotation now follows Swiss Ephemeris's forecast, the Sun's position uses a more complete series and the modern precession, and sunrise uses the refraction and solar disc of that day.
+* An optional link from the Vedic date to the plugin's page, off by default.
 
 = 1.0.0 =
 * First release.

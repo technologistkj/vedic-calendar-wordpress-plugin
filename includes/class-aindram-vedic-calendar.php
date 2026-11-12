@@ -40,6 +40,11 @@ final class Aindram_Vedic_Calendar {
 	const MARK_PATTERN = '/\x{2063}([\x{200B}\x{200C}]+)\x{2063}/u';
 
 	/**
+	 * Where the date links to, when the site has chosen to link it.
+	 */
+	const LINK = 'https://wordpress.org/plugins/aindram-vedic-calendar/';
+
+	/**
 	 * The one instance.
 	 *
 	 * @var Aindram_Vedic_Calendar|null
@@ -90,7 +95,8 @@ final class Aindram_Vedic_Calendar {
 	}
 
 	/**
-	 * Out of the box: posts and pages.
+	 * Out of the box: posts and pages, and no link. A link on the public site is
+	 * the site owner's choice to make, so it is off until they turn it on.
 	 *
 	 * @return array
 	 */
@@ -98,7 +104,28 @@ final class Aindram_Vedic_Calendar {
 		return array(
 			'post_types' => array( 'post', 'page' ),
 			'format'     => '{month} {day}, KaliYuga {year}',
+			'link'       => false,
 		);
+	}
+
+	/**
+	 * The address the date links to, or '' when the site has not chosen to link
+	 * it.
+	 *
+	 * @return string
+	 */
+	public static function link_url() {
+		if ( empty( self::options()['link'] ) ) {
+			return '';
+		}
+
+		/**
+		 * Filters where the Vedic date links to, when linking is on. Return ''
+		 * for no link.
+		 *
+		 * @param string $url The plugin's page on WordPress.org.
+		 */
+		return (string) apply_filters( 'aindram_vedic_calendar_link', self::LINK );
 	}
 
 	/**
@@ -161,7 +188,7 @@ final class Aindram_Vedic_Calendar {
 	public function enqueue() {
 		wp_register_style( 'aindram-vedic-calendar', false, array(), AINDRAM_VEDIC_CALENDAR_VERSION );
 		wp_enqueue_style( 'aindram-vedic-calendar' );
-		wp_add_inline_style( 'aindram-vedic-calendar', '.aindram-vedic-calendar-date{display:block;font-size:.85em;line-height:1.5;opacity:.85}' );
+		wp_add_inline_style( 'aindram-vedic-calendar', '.aindram-vedic-calendar-date{display:block;font-size:.85em;line-height:1.5;opacity:.85}a.aindram-vedic-calendar-date{color:inherit;text-decoration:none}a.aindram-vedic-calendar-date:hover,a.aindram-vedic-calendar-date:focus{text-decoration:underline}' );
 	}
 
 	/**
@@ -282,7 +309,19 @@ final class Aindram_Vedic_Calendar {
 		if ( false === $at ) {
 			return $content;
 		}
-		return substr_replace( $content, $this->html( $m[1] ), $at + 7, 0 );
+		$at += 7;
+
+		// With "Link to post" on, the time sits inside the block's own link. The
+		// Vedic date goes after that link when it is to be a link itself, since
+		// links cannot nest; otherwise it stays where it was, inside.
+		if ( self::inside_link( substr( $content, 0, $at ) ) ) {
+			$close = stripos( $content, '</a>', $at );
+			if ( '' === self::link_url() || false === $close ) {
+				return substr_replace( $content, $this->html( $m[1], false ), $at, 0 );
+			}
+			$at = $close + 4;
+		}
+		return substr_replace( $content, $this->html( $m[1] ), $at, 0 );
 	}
 
 	/**
@@ -299,7 +338,6 @@ final class Aindram_Vedic_Calendar {
 		$steps = array(
 			'#<(script|style|textarea|title)\b[^>]*>.*?</\1\s*>#is' => array( $this, 'strip_marks_match' ),
 			'/<[^>]+>/'                                              => array( $this, 'strip_marks_match' ),
-			self::MARK_PATTERN                                        => array( $this, 'mark_html' ),
 		);
 		foreach ( $steps as $pattern => $callback ) {
 			$done = preg_replace_callback( $pattern, $callback, $html );
@@ -308,18 +346,71 @@ final class Aindram_Vedic_Calendar {
 			}
 			$html = $done;
 		}
-		return $html;
+
+		// What is left is marks in text. Walk them with the links around them:
+		// most themes make the date a link to the post, and links cannot nest.
+		// So when the Vedic date is to be a link, one inside a theme's link is
+		// moved to just after it; when it is not, it stays where it is.
+		$pieces = preg_split( '#(<a\b[^>]*>|</a\s*>|\x{2063}[\x{200B}\x{200C}]+\x{2063})#iu', $html, -1, PREG_SPLIT_DELIM_CAPTURE );
+		if ( false === $pieces ) {
+			return $this->strip_marks( $html );
+		}
+		$linking = '' !== self::link_url();
+		$depth   = 0;
+		$waiting = array();
+		foreach ( $pieces as $i => $piece ) {
+			if ( 1 !== $i % 2 ) {
+				continue;
+			}
+			if ( self::MARK === substr( $piece, 0, 3 ) ) {
+				if ( 0 === $depth || ! $linking ) {
+					$pieces[ $i ] = $this->mark_html( $piece, 0 === $depth );
+				} else {
+					$waiting[ $i ] = $piece;
+					$pieces[ $i ]  = '';
+				}
+			} elseif ( '/' === $piece[1] ) {
+				$depth = max( 0, $depth - 1 );
+				if ( 0 === $depth && $waiting ) {
+					foreach ( $waiting as $mark ) {
+						$pieces[ $i ] .= $this->mark_html( $mark );
+					}
+					$waiting = array();
+				}
+			} else {
+				++$depth;
+			}
+		}
+		// A link this piece of HTML never closes: leave those dates in place.
+		foreach ( $waiting as $i => $mark ) {
+			$pieces[ $i ] = $this->mark_html( $mark, false );
+		}
+		return implode( '', $pieces );
+	}
+
+	/**
+	 * Whether the end of a piece of HTML is inside a link.
+	 *
+	 * @param string $html HTML.
+	 * @return bool
+	 */
+	private static function inside_link( $html ) {
+		return preg_match_all( '#<a\b[^>]*>#i', $html ) > preg_match_all( '#</a\s*>#i', $html );
 	}
 
 	/**
 	 * A mark, as HTML.
 	 *
-	 * @param string[] $m The mark matched.
+	 * @param string $mark     The mark.
+	 * @param bool   $linkable False where the mark stands inside a link.
 	 * @return string
 	 */
-	public function mark_html( $m ) {
+	public function mark_html( $mark, $linkable = true ) {
+		if ( ! preg_match( self::MARK_PATTERN, $mark, $m ) ) {
+			return '';
+		}
 		$number = bindec( strtr( $m[1], array( "\u{200B}" => '0', "\u{200C}" => '1' ) ) );
-		return isset( $this->marks[ $number ] ) ? $this->html( $this->marks[ $number ] ) : '';
+		return isset( $this->marks[ $number ] ) ? $this->html( $this->marks[ $number ], $linkable ) : '';
 	}
 
 	/**
@@ -364,14 +455,28 @@ final class Aindram_Vedic_Calendar {
 	}
 
 	/**
-	 * The line as HTML.
+	 * The line as HTML: a link to the plugin's page when the site has turned
+	 * that on and the line is not already inside a link.
 	 *
-	 * @param string $ymd Y-m-d.
+	 * @param string $ymd      Y-m-d.
+	 * @param bool   $linkable False where the line stands inside a link.
 	 * @return string
 	 */
-	private function html( $ymd ) {
+	private function html( $ymd, $linkable = true ) {
 		$label = self::label( $ymd );
-		return '' === $label ? '' : '<span class="aindram-vedic-calendar-date">' . esc_html( $label ) . '</span>';
+		if ( '' === $label ) {
+			return '';
+		}
+		$url = $linkable ? self::link_url() : '';
+		if ( '' === $url ) {
+			return '<span class="aindram-vedic-calendar-date">' . esc_html( $label ) . '</span>';
+		}
+		return sprintf(
+			'<a class="aindram-vedic-calendar-date" href="%1$s" target="_blank" rel="noopener" title="%2$s">%3$s</a>',
+			esc_url( $url ),
+			esc_attr__( 'About Aindram Vedic Calendar, and how to add it to your own site', 'aindram-vedic-calendar' ),
+			esc_html( $label )
+		);
 	}
 
 	/**
