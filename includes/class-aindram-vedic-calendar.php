@@ -183,12 +183,13 @@ final class Aindram_Vedic_Calendar {
 	}
 
 	/**
-	 * The one rule of style the line needs: it sits below the date.
+	 * The one rule of style the line needs: it sits below the date, 10%
+	 * larger than the date it is drawn under.
 	 */
 	public function enqueue() {
 		wp_register_style( 'aindram-vedic-calendar', false, array(), AINDRAM_VEDIC_CALENDAR_VERSION );
 		wp_enqueue_style( 'aindram-vedic-calendar' );
-		wp_add_inline_style( 'aindram-vedic-calendar', '.aindram-vedic-calendar-date{display:block;font-size:.85em;line-height:1.5;opacity:.85}a.aindram-vedic-calendar-date{color:inherit;text-decoration:none}a.aindram-vedic-calendar-date:hover,a.aindram-vedic-calendar-date:focus{text-decoration:underline}' );
+		wp_add_inline_style( 'aindram-vedic-calendar', '.aindram-vedic-calendar-date{display:block;font-size:1.1em;line-height:1.5;opacity:.85}a.aindram-vedic-calendar-date{color:inherit;text-decoration:none}a.aindram-vedic-calendar-date:hover,a.aindram-vedic-calendar-date:focus{text-decoration:underline}' );
 	}
 
 	/**

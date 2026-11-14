@@ -4,7 +4,7 @@ Tags: calendar, vedic, kerala, malayalam, panchang
 Requires at least: 5.9
 Tested up to: 7.1
 Requires PHP: 7.2
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPL-2.0-only
 License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 
@@ -73,6 +73,9 @@ Not unless you choose to. Settings > Aindram Vedic Calendar has a Link option, o
 Yes. The line is part of the page HTML, so a cached page carries it.
 
 == Changelog ==
+
+= 1.1.1 =
+* The Vedic date is drawn 10% larger than the date above it, instead of smaller.
 
 = 1.1.0 =
 * Dates checked against Swiss Ephemeris to 2600, up from 2100: the Earth's slowing rotation now follows Swiss Ephemeris's forecast, the Sun's position uses a more complete series and the modern precession, and sunrise uses the refraction and solar disc of that day.
